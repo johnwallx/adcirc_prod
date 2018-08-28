@@ -29,7 +29,6 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import FancyArrowPatch
-from matplotlib.animation import FuncAnimation
 from PIL import *
 import glob
 import os

@@ -27,6 +27,7 @@ import matplotlib as mpl
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+import matplotlib
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import FancyArrowPatch
 from PIL import *

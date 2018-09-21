@@ -27,6 +27,7 @@ import matplotlib as mpl
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+import matplotlib
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import FancyArrowPatch
 from PIL import *
@@ -144,10 +145,10 @@ class adcirc:
                 i+=1
             else:
                 if 'surface_directional' in xx[i]:
-                    table[xx[i].split('_')[0]+'dir_nodes'],table['e'],table['ene'],table['ne'],table['n'], table['nw'], table['wnw'], table['w'], table['wsw'],table['sw'], table['s'], table['se'], table['ese'] = table[xx[i]].str.split(' ', 0).str
+                    table[xx[i].split('_')[0]+'dir_nodes'],table['e'],table['ene'],table['ne'],table['n'], table['nw'], table['wnw'], table['w'], table['wsw'],table['sw'], table['s'], table['se'], table['ese'] = table[xx[i]].str.strip().str.split('\s+', 0).str
                     table = table.drop(xx[i],1)
                 else:
-                    table[xx[i].split('_')[0]+'nodes'], table[xx[i].split('_')[0]+'data'] = table[xx[i]].str.split(' ', 1).str
+                    table[xx[i].split('_')[0]+'nodes'], table[xx[i].split('_')[0]+'data'] = table[xx[i]].str.strip().str.split(' ', 1).str
                     table = table.drop(xx[i],1)
         return table
     

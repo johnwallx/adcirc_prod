@@ -30,7 +30,7 @@ import matplotlib.tri as tri
 import matplotlib
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import FancyArrowPatch
-from PIL import *
+from PIL import Image
 import glob
 import os
 import scipy.interpolate
@@ -441,6 +441,7 @@ class adcirc:
         wl=[]
         xx = netcdf_file.variables['x'][:]
         yy = netcdf_file.variables['y'][:]
+        data = netcdf_file.variables['zeta'][:]
         gridvars = netcdf_file.variables      
         var_element = 'element'
         elems = gridvars[var_element][:,:]-1
@@ -451,7 +452,7 @@ class adcirc:
             data1 = netcdf_file.variables['zeta'][i,:]
             file_number = '%05d'%i
             triang = tri.Triangulation(xx,yy, triangles=elems)
-            m.arcgisimage(service='ESRI_Imagery_World_2D', xpixels=600, verbose= False)
+            m.arcgisimage(service='ESRI_Imagery_World_2D', xpixels=400, verbose= False)
             m.drawcoastlines(color='k')
             if data1.mask.any():
                 point_mask_indices = np.where(data1.mask)
@@ -460,7 +461,7 @@ class adcirc:
             plt.xlim([lon1, lon2])
             plt.ylim([lat1, lat2])    
             plt.tricontourf(triang, data1, levels=levels,alpha=0.75,
-                            vmin=-1, vmax=6, aspect='auto',cmap='jet')
+                            vmin=-2.5, vmax=round(np.max(data)+1,0), aspect='auto',cmap='jet')
             wl.append('WL{}.png'.format(file_number))
             cb = plt.colorbar(cmap='jet',fraction=0.026,pad=0.04) 
             cb.set_label('MSL (meters)',fontsize=10)
@@ -844,7 +845,7 @@ class adcirc:
             triang.set_mask(tri_mask)
         plt.xlim([lon1, lon2])
         plt.ylim([lat1, lat2])    
-        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-1, vmax=8, aspect='auto',cmap='jet')
+        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-2.5, vmax=round(np.max(data1)+1,0), aspect='auto',cmap='jet')
         cb=plt.colorbar(cmap='jet',fraction=0.026,pad=0.04) 
         cb.set_label('MSL (m)')
         plt.title(title + '\n')
@@ -869,7 +870,7 @@ class adcirc:
             triang.set_mask(tri_mask)
         plt.xlim([lon1, lon2])
         plt.ylim([lat1, lat2])    
-        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-1, vmax=60, aspect='auto',cmap='jet')
+        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-0.1, vmax=round(np.max(data1)+1,0), aspect='auto',cmap='jet')
         cb=plt.colorbar(cmap='jet',fraction=0.026,pad=0.04) 
         cb.set_label('Max Wind Magnitude (m/s)')
         plt.title(title + '\n')
@@ -894,7 +895,7 @@ class adcirc:
             triang.set_mask(tri_mask)
         plt.xlim([lon1, lon2])
         plt.ylim([lat1, lat2])
-        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-1, vmax=6, aspect='auto',cmap='jet')
+        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=-0.1, vmax=round(np.max(data1)+1,0), aspect='auto',cmap='jet')
         cb=plt.colorbar(cmap='jet',fraction=0.026,pad=0.04)
         cb.set_label('Depth Velocity (m/s)')
         plt.title(title + '\n')
@@ -919,7 +920,7 @@ class adcirc:
             triang.set_mask(tri_mask)
         plt.xlim([lon1, lon2])
         plt.ylim([lat1, lat2])
-        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=8.75, vmax=10.6, aspect='auto',cmap='jet')
+        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=round(np.min(data1)), vmax=round(np.max(data1)+1,0), aspect='auto',cmap='jet')
         cb=plt.colorbar(cmap='jet',fraction=0.026,pad=0.04) 
         cb.set_label('Pressure (kPa)',fontsize=12)
         plt.title(title + '\n')
@@ -927,7 +928,30 @@ class adcirc:
         #plt.close()
         return plt.show()      
     
-    
+    def swan_HSmax(global_path,netcdf_file,ax,title,levels,lon1,lon2,lat1,lat2):
+        xx = netcdf_file.variables['x'][:]
+        yy = netcdf_file.variables['y'][:]
+        gridvars = netcdf_file.variables      
+        var_element = 'element'
+        elems = gridvars[var_element][:,:]-1
+        m = Basemap(projection='cyl',llcrnrlat=lat1,urcrnrlat=lat2,llcrnrlon=lon1,urcrnrlon=lon2,resolution='h', epsg = 4269)
+        data1 = netcdf_file.variables['swan_HS_max'][:]
+        triang = tri.Triangulation(xx,yy, triangles=elems)
+        m.arcgisimage(service='ESRI_Imagery_World_2D', xpixels=600, verbose= False)
+        m.drawcoastlines(color='k')
+        if data1.mask.any():
+            point_mask_indices = np.where(data1.mask)
+            tri_mask = np.any(np.in1d(elems, point_mask_indices).reshape(-1, 3), axis=1)
+            triang.set_mask(tri_mask)
+        plt.xlim([lon1, lon2])
+        plt.ylim([lat1, lat2])    
+        plt.tricontourf(triang, data1, levels=levels,alpha=0.75,vmin=0, vmax=10, aspect='auto',cmap='jet')
+        cb=plt.colorbar(cmap='jet',fraction=0.026,pad=0.04) 
+        cb.set_label('MSL (m)')
+        plt.title(title + '\n')
+        #plt.savefig('max_WL.png',dpi=500, bbox_inches = 'tight', pad_inches = 0.1)
+        #plt.close()
+        return plt.show()
     def plot_tide_gauges(path,nc_file,begin,last,title,out_freq, names=None):
         stations = tide_gauges()
         model_data = nc_file['zeta'][:,23]

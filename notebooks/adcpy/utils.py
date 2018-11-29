@@ -55,6 +55,25 @@ def plot_timeseries(table,start,end,station):
                         color = ('rgb(100, 100, 53)')))
     data = [trace,trace2,trace3]
     return data
+def plot_tidal(table,start,end,station):
+    pred = pd.read_csv('https://tidesandcurrents.noaa.gov/api/datagetter?product=predictions&application=NOS.COOPS.TAC.WL&begin_date='+start+'&end_date='+end+'&datum=MSL&station='+station+'&time_zone=GMT&units=metric&interval=6&format=csv')
+    obs  = pd.read_csv('https://tidesandcurrents.noaa.gov/api/datagetter?product=water_level&application=NOS.COOPS.TAC.WL&begin_date='+start+'&end_date='+end+'&datum=MSL&station='+station+'&time_zone=GMT&units=metric&format=csv')
+    table = table.set_index(pd.DatetimeIndex(table['Date Time']))
+    pred = pred.set_index(pd.DatetimeIndex(pred['Date Time']))
+    trace = go.Scatter(x = table['Date Time'],y = table[' Prediction'],
+                name = 'ADCIRC',mode = 'lines',
+                line = dict(
+                    color = ('rgb(204, 0, 153)')))
+    trace2 = go.Scatter(x = pred['Date Time'],y = pred[' Prediction'],
+                    name = 'NOAA Prediction',mode = 'lines',
+                    line = dict(
+                        color = ('rgb(100, 100, 153)')))
+    trace3 = go.Scatter(x = obs['Date Time'],y = obs[' Water Level'],
+                    name = 'NOAA Observation',mode = 'lines',
+                    line = dict(
+                        color = ('rgb(100, 100, 53)')))
+    data = [trace,trace2]
+    return data
 
 def layout(title,xaxis,yaxis):
     layout = go.Layout(dict(title=title),xaxis = dict(title = xaxis),
